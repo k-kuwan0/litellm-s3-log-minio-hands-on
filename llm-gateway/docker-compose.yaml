@@ -1,0 +1,75 @@
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.82.3-stable.patch.2
+    container_name: litellm
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./lite-llm/config.local.yaml:/app/config.yaml
+    environment:
+      CONFIG_FILE_PATH: /app/config.yaml
+      LITELLM_MASTER_KEY: "sk-local-dev-key"
+      DATABASE_URL: "postgresql://litellm:litellm@postgres:5432/litellm"
+      AWS_SESSION_TOKEN: ""
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-northeast-1}
+      BEDROCK_AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      BEDROCK_AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BEDROCK_AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      S3_LOG_BUCKET_NAME: litellm-log-archive
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_AWS_ACCESS_KEY_ID: minioadmin
+      S3_AWS_SECRET_ACCESS_KEY: minioadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:17.8
+    container_name: litellm-postgres
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: litellm
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/postgresql/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d litellm -U litellm" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: litellm-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./storages/minio/data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: litellm-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -euo pipefail
+        mc alias set local http://minio:9000 minioadmin minioadmin
+        mc mb --ignore-existing local/litellm-log-archive

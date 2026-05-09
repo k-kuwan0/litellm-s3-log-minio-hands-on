@@ -1,0 +1,18 @@
+{
+    "editor.minimap.enabled": false,
+    "editor.fontFamily": "'HackGen Console NF', 'HackGen Console', monospace",
+    "editor.renderWhitespace": "boundary",
+    "editor.guides.bracketPairs": true,
+    "editor.lineHeight": 1.5,
+    "editor.fontSize": 12,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null,
+    "[dockerfile][dockercompose]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+    }
+}

@@ -1,0 +1,28 @@
+general_settings:
+  store_model_in_db: true
+  supported_db_objects:
+    - models
+    - guardrails
+    - mcp
+    - prompts
+
+model_list:
+  - model_name: nova-lite
+    litellm_params:
+      model: bedrock/amazon.nova-lite-v1:0
+      aws_region_name: os.environ/AWS_DEFAULT_REGION
+      aws_access_key_id: os.environ/BEDROCK_AWS_ACCESS_KEY_ID
+      aws_secret_access_key: os.environ/BEDROCK_AWS_SECRET_ACCESS_KEY
+      aws_session_token: os.environ/BEDROCK_AWS_SESSION_TOKEN
+
+litellm_settings:
+  success_callback: ["s3_v2"]
+  s3_callback_params:
+    s3_bucket_name: os.environ/S3_LOG_BUCKET_NAME
+    s3_region_name: os.environ/AWS_DEFAULT_REGION
+    s3_endpoint_url: os.environ/S3_ENDPOINT_URL
+    s3_aws_access_key_id: os.environ/S3_AWS_ACCESS_KEY_ID
+    s3_aws_secret_access_key: os.environ/S3_AWS_SECRET_ACCESS_KEY
+    s3_path: request_logs/
+    s3_use_team_prefix: true
+    s3_use_key_prefix: true

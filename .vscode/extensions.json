@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "MS-CEINTL.vscode-language-pack-ja",
+        "streetsidesoftware.code-spell-checker",
+        "PKief.material-icon-theme",
+        "Anthropic.claude-code",
+        "ms-azuretools.vscode-containers"
+    ]
+}
